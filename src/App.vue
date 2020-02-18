@@ -5,9 +5,9 @@
       <button @click="filter('completed')">Clear Completed</button>
     </div>
     <div>
-      <div class="todo-item" v-for="todo in todos" :key="todo.id">
+      <div class="todo-item" v-for="todo in filteredTodos" :key="todo.id">
         <div class="todo-check">
-          <input type="checkbox" :checked="todo.completed" />
+          <input type="checkbox" v-model="todo.completed" />
         </div>
 
         <template v-if="editData.id === todo.id">
@@ -20,9 +20,7 @@
           </div>
         </template>
         <template v-else>
-          <div class="todo-content">
-            {{ todo.content }}
-          </div>
+          <div class="todo-content">{{ todo.content }}</div>
           <div class="todo-buttonBox">
             <button @click="turnEditMode(todo)">EditMode</button>
             <button @click="deleteTodo(todo.id)">Delete</button>
@@ -31,8 +29,10 @@
       </div>
     </div>
     <div>
-      <span>Filter</span> <button>All</button> <button>Completed</button>
-      <button>Not</button>
+      <span>Filter</span>
+      <button @click="setFilter(FilterType.ALL)">All</button>
+      <button @click="setFilter(FilterType.COMPLETED)">Completed</button>
+      <button @click="setFilter(FilterType.NOT_COMPLETED)">Not Completed</button>
     </div>
   </div>
 </template>
@@ -40,16 +40,48 @@
 <script>
 import db from "./db";
 
+const FilterType = {
+  ALL: "all",
+  COMPLETED: "completed",
+  NOT_COMPLETED: "not completed"
+};
+
+// type: all, completed, not completed
+function filterTodos(todos, type = FilterType.ALL) {
+  if (type === FilterType.ALL) {
+    return todos;
+  } else if (type === FilterType.COMPLETED) {
+    return todos.filter(todo => todo.completed);
+  } else if (type === FilterType.NOT_COMPLETED) {
+    return todos.filter(todo => !todo.completed);
+  }
+}
+
 export default {
   data() {
     return {
       inputValue: "",
       todos: db.fetchData(),
+      filterType: FilterType.ALL,
       editData: {
         id: null,
         content: ""
-      }
+      },
+      FilterType
     };
+  },
+  computed: {
+    filteredTodos() {
+      return filterTodos(this.todos, this.filterType);
+    }
+  },
+  watch: {
+    todos(newTodos) {
+      console.log(newTodos);
+    },
+    filterType(newType) {
+      console.log(newType);
+    }
   },
   methods: {
     turnEditMode(todo) {
@@ -86,8 +118,8 @@ export default {
       finded.content = this.editData.content;
       this.editData.id = null;
     },
-    filter(type) {
-      console.log(type);
+    setFilter(type) {
+      this.filterType = type;
     }
   }
 };
