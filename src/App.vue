@@ -1,8 +1,11 @@
 <template>
   <div>
     <div>
+      <button @click="clearAll">Clear ALL</button>
+      <button @click="clearCompleted">Clear COMPLETED</button>
+    </div>
+    <div>
       <input type="text" v-model="inputValue" @keydown.enter="addTodo" />
-      <button @click="filter('completed')">Clear Completed</button>
     </div>
     <div>
       <div class="todo-item" v-for="todo in filteredTodos" :key="todo.id">
@@ -84,6 +87,12 @@ export default {
     }
   },
   methods: {
+    clearAll() {
+      this.todos = [];
+    },
+    clearCompleted() {
+      this.todos = filterTodos(this.todos, FilterType.NOT_COMPLETED);
+    },
     turnEditMode(todo) {
       this.editData.id = todo.id;
       this.editData.content = todo.content;
